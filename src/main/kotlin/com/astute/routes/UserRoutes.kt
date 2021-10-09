@@ -19,7 +19,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import java.util.*
 
-fun Route.createUserRoute(
+fun Route.createUser(
     userService: UserService
 ) {
     post("/api/user/create") {
