@@ -2,6 +2,8 @@ package com.astute.routes
 
 import com.astute.data.requests.LikeUpdateRequest
 import com.astute.data.responses.BasicApiResponse
+import com.astute.data.util.ParentType
+import com.astute.service.ActivityService
 import com.astute.service.LikeService
 import com.astute.util.ApiResponseMessages
 import io.ktor.application.*
@@ -12,7 +14,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.likeParent(
-    likeService: LikeService
+    likeService: LikeService,
+    activityService: ActivityService
 ) {
     authenticate {
         post("/api/like") {
@@ -21,8 +24,14 @@ fun Route.likeParent(
                 return@post
             }
 
-            val likeSuccessful = likeService.likeParent(call.userId, request.parentId)
+            val userId = call.userId
+            val likeSuccessful = likeService.likeParent(userId, request.parentId, request.parentType)
             if(likeSuccessful) {
+                activityService.addLikeActivity(
+                    byUserId = userId,
+                    parentType = ParentType.fromType(request.parentType),
+                    parentId = request.parentId
+                )
                 call.respond(
                     HttpStatusCode.OK,
                     BasicApiResponse(

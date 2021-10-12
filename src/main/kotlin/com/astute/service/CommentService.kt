@@ -33,6 +33,10 @@ class CommentService(
         return repository.deleteComment(commentId)
     }
 
+    suspend fun deleteCommentsForPost(postId: String) {
+        repository.deleteCommentsFromPost(postId)
+    }
+
     suspend fun getCommentsForPost(postId: String): List<Comment> {
         return repository.getCommentsForPost(postId)
     }

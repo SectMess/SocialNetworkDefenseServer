@@ -3,6 +3,7 @@ package com.astute.routes
 import com.astute.data.requests.CreateCommentRequest
 import com.astute.data.requests.DeleteCommentRequest
 import com.astute.data.responses.BasicApiResponse
+import com.astute.service.ActivityService
 import com.astute.service.CommentService
 import com.astute.service.LikeService
 import com.astute.service.UserService
@@ -17,6 +18,7 @@ import io.ktor.routing.*
 
 fun Route.createComment(
     commentService: CommentService,
+    activityService: ActivityService
 ) {
     authenticate {
         post("/api/comment/create") {
@@ -24,7 +26,8 @@ fun Route.createComment(
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            when(commentService.createComment(request, call.userId)) {
+            val userId = call.userId
+            when(commentService.createComment(request, userId)) {
                 is CommentService.ValidationEvent.ErrorFieldEmpty -> {
                     call.respond(
                         HttpStatusCode.OK,
@@ -44,6 +47,10 @@ fun Route.createComment(
                     )
                 }
                 is CommentService.ValidationEvent.Success -> {
+                    activityService.addCommentActivity(
+                        byUserId = userId,
+                        postId = request.postId,
+                    )
                     call.respond(
                         HttpStatusCode.OK,
                         BasicApiResponse(

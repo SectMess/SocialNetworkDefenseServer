@@ -3,6 +3,7 @@ package com.astute.routes
 import com.astute.data.requests.CreatePostRequest
 import com.astute.data.requests.DeletePostRequest
 import com.astute.data.responses.BasicApiResponse
+import com.astute.service.CommentService
 import com.astute.service.LikeService
 import com.astute.service.PostService
 import com.astute.util.ApiResponseMessages
@@ -67,7 +68,8 @@ fun Route.getPostsForFollows(
 
 fun Route.deletePost(
     postService: PostService,
-    likeService: LikeService
+    likeService: LikeService,
+    commentService: CommentService
 ) {
     authenticate {
         delete("/api/post/delete") {
@@ -83,7 +85,7 @@ fun Route.deletePost(
             if(post.userId == call.userId) {
                 postService.deletePost(request.postId)
                 likeService.deleteLikesForParent(request.postId)
-                // TODO: Delete comments from post
+                commentService.deleteCommentsForPost(request.postId)
                 call.respond(HttpStatusCode.OK)
             } else {
                 call.respond(HttpStatusCode.Unauthorized)

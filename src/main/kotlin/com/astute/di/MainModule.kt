@@ -1,5 +1,7 @@
 package com.astute.di
 
+import com.astute.data.repository.activity.ActivityRepository
+import com.astute.data.repository.activity.ActivityRepositoryImpl
 import com.astute.data.repository.comment.CommentRepository
 import com.astute.data.repository.comment.CommentRepositoryImpl
 import com.astute.data.repository.follow.FollowRepository
@@ -36,9 +38,14 @@ val mainModule = module {
     single<LikeRepository> {
         LikeRepositoryImpl(get())
     }
+    single<ActivityRepository> {
+        ActivityRepositoryImpl(get())
+    }
     single { UserService(get()) }
     single { FollowService(get()) }
     single { PostService(get()) }
     single { LikeService(get()) }
     single { CommentService(get()) }
+    single { ActivityService(get(), get(), get()) }
+
 }
