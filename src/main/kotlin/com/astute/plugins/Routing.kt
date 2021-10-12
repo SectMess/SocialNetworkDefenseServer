@@ -28,6 +28,7 @@ fun Application.configureRouting() {
             jwtAudience = jwtAudience,
             jwtSecret = jwtSecret
         )
+        searchUser(userService)
 
         //Following Routes
         followUser(followService, activityService)

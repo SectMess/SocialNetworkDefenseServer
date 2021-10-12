@@ -1,5 +1,6 @@
 package com.astute.routes
 
+import com.astute.data.models.User
 import com.astute.data.requests.CreateAccountRequest
 import com.astute.data.requests.LoginRequest
 import com.astute.data.responses.AuthResponse
@@ -8,9 +9,11 @@ import com.astute.service.UserService
 import com.astute.util.ApiResponseMessages.FIELDS_BLANK
 import com.astute.util.ApiResponseMessages.INVALID_CREDENTIALS
 import com.astute.util.ApiResponseMessages.USER_ALREADY_EXISTS
+import com.astute.util.QueryParams
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -106,6 +109,26 @@ fun Route.loginUser(
                     successful = false,
                     message = INVALID_CREDENTIALS
                 )
+            )
+        }
+    }
+}
+
+fun Route.searchUser(userService: UserService) {
+    authenticate {
+        get("/api/user/search") {
+            val query = call.parameters[QueryParams.PARAM_QUERY]
+            if (query == null || query.isBlank()) {
+                call.respond(
+                    HttpStatusCode.OK,
+                    listOf<User>()
+                )
+                return@get
+            }
+            val searchResults = userService.searchForUsers(query, call.userId)
+            call.respond(
+                HttpStatusCode.OK,
+                searchResults
             )
         }
     }
