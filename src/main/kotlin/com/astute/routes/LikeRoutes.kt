@@ -6,6 +6,7 @@ import com.astute.data.util.ParentType
 import com.astute.service.ActivityService
 import com.astute.service.LikeService
 import com.astute.util.ApiResponseMessages
+import com.astute.util.QueryParams
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -79,6 +80,25 @@ fun Route.unlikeParent(
                 )
             }
 
+        }
+    }
+}
+
+fun Route.getLikesForParent(likeService: LikeService) {
+    authenticate {
+        get("/api/like/parent") {
+            val parentId = call.parameters[QueryParams.PARAM_PARENT_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            val usersWhoLikedParent = likeService.getUsersWhoLikedParent(
+                parentId = parentId,
+                call.userId
+            )
+            call.respond(
+                HttpStatusCode.OK,
+                usersWhoLikedParent
+            )
         }
     }
 }

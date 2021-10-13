@@ -9,10 +9,10 @@ class PostService(
     private val repository: PostRepository
 ) {
 
-    suspend fun createPostIfUserExists(request: CreatePostRequest, userId: String): Boolean {
-        return repository.createPostIfUserExists(
+    suspend fun createPost(request: CreatePostRequest, userId: String, imageUrl: String): Boolean {
+        return repository.createPost(
             Post(
-                imageUrl = "",
+                imageUrl = imageUrl,
                 userId = userId,
                 timestamp = System.currentTimeMillis(),
                 description = request.description
@@ -26,6 +26,14 @@ class PostService(
         pageSize: Int = Constants.DEFAULT_POST_PAGE_SIZE
     ): List<Post> {
         return repository.getPostsByFollows(userId, page, pageSize)
+    }
+
+    suspend fun getPostsForProfile(
+        userId: String,
+        page: Int = 0,
+        pageSize: Int = Constants.DEFAULT_POST_PAGE_SIZE
+    ): List<Post> {
+        return repository.getPostsForProfile(userId, page, pageSize)
     }
 
     suspend fun getPost(postId: String): Post? = repository.getPost(postId)

@@ -1,6 +1,7 @@
 package com.astute.data.repository.user
 
 import com.astute.data.models.User
+import com.astute.data.requests.UpdateProfileRequest
 
 interface UserRepository {
 
@@ -10,10 +11,18 @@ interface UserRepository {
 
     suspend fun getUserByEmail(email: String): User?
 
+    suspend fun updateUser(
+        userId: String,
+        profileImageUrl: String,
+        updateProfileRequest: UpdateProfileRequest
+    ): Boolean
+
     suspend fun doesPasswordForUserMatch(email: String, enteredPassword: String): Boolean
 
     suspend fun doesEmailBelongToUserId(email: String, userId: String): Boolean
 
     suspend fun searchForUsers(query: String): List<User>
+
+    suspend fun getUsers(userIds: List<String>): List<User>
 
 }

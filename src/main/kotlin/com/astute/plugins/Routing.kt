@@ -4,6 +4,7 @@ import com.astute.routes.*
 import com.astute.service.*
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.http.content.*
 import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
@@ -29,6 +30,9 @@ fun Application.configureRouting() {
             jwtSecret = jwtSecret
         )
         searchUser(userService)
+        getUserProfile(userService)
+        getPostsForProfile(postService)
+        updateUserProfile(userService)
 
         //Following Routes
         followUser(followService, activityService)
@@ -41,6 +45,7 @@ fun Application.configureRouting() {
         // Like routes
         likeParent(likeService, activityService)
         unlikeParent(likeService)
+        getLikesForParent(likeService)
 
         // Comment routes
         createComment(commentService , activityService)
@@ -49,5 +54,9 @@ fun Application.configureRouting() {
 
         // Activity routes
         getActivities(activityService)
+
+        static {
+            resources("static")
+        }
     }
 }

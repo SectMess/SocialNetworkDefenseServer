@@ -15,13 +15,8 @@ class PostRepositoryImpl(
     private val following = db.getCollection<Following>()
     private val users = db.getCollection<User>()
 
-    override suspend fun createPostIfUserExists(post: Post): Boolean {
-        val doesUserExist = users.findOneById(post.userId) != null
-        if (!doesUserExist) {
-            return false
-        }
-        posts.insertOne(post)
-        return true
+    override suspend fun createPost(post: Post): Boolean {
+        return posts.insertOne(post).wasAcknowledged()
     }
 
     override suspend fun deletePost(postId: String) {
@@ -39,6 +34,14 @@ class PostRepositoryImpl(
                 it.followedUserId
             }
         return posts.find(Post::userId `in` userIdsFromFollows)
+            .skip(page * pageSize)
+            .limit(pageSize)
+            .descendingSort(Post::timestamp)
+            .toList()
+    }
+
+    override suspend fun getPostsForProfile(userId: String, page: Int, pageSize: Int): List<Post> {
+        return posts.find(Post::userId eq userId)
             .skip(page * pageSize)
             .limit(pageSize)
             .descendingSort(Post::timestamp)
