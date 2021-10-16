@@ -4,7 +4,6 @@ import com.astute.data.models.User
 import com.astute.data.repository.follow.FollowRepository
 import com.astute.data.repository.user.UserRepository
 import com.astute.data.requests.CreateAccountRequest
-import com.astute.data.requests.LoginRequest
 import com.astute.data.requests.UpdateProfileRequest
 import com.astute.data.responses.ProfileResponse
 import com.astute.data.responses.UserResponseItem
@@ -34,6 +33,7 @@ class UserService(
                 username = request.username,
                 password = request.password,
                 profileImageUrl = "",
+                bannerUrl = "",
                 bio = "",
                 gitHubUrl = null,
                 instagramUrl = null,
@@ -45,12 +45,14 @@ class UserService(
     suspend fun getUserProfile(userId: String, callerUserId: String): ProfileResponse? {
         val user = userRepository.getUserById(userId) ?: return null
         return ProfileResponse(
+            userId = user.id,
             username = user.username,
             bio = user.bio,
             followerCount = user.followerCount,
             followingCount = user.followingCount,
             postCount = user.postCount,
             profilePictureUrl = user.profileImageUrl,
+            bannerUrl = user.bannerUrl,
             topSkillUrls = user.skills,
             gitHubUrl = user.gitHubUrl,
             instagramUrl = user.instagramUrl,
@@ -66,10 +68,11 @@ class UserService(
 
     suspend fun updateUser(
         userId: String,
-        profileImageUrl: String,
+        profileImageUrl: String?,
+        bannerUrl: String?,
         updateProfileRequest: UpdateProfileRequest
     ): Boolean {
-        return userRepository.updateUser(userId, profileImageUrl, updateProfileRequest)
+        return userRepository.updateUser(userId, profileImageUrl, bannerUrl, updateProfileRequest)
     }
 
     suspend fun searchForUsers(query: String, userId: String): List<UserResponseItem> {
@@ -78,6 +81,7 @@ class UserService(
         return users.map { user ->
             val isFollowing = followsByUser.find { it.followedUserId == user.id } != null
             UserResponseItem(
+                userId = user.id,
                 username = user.username,
                 profilePictureUrl = user.profileImageUrl,
                 bio = user.bio,

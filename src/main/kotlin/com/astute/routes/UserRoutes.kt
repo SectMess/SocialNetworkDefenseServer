@@ -1,24 +1,17 @@
 package com.astute.routes
 
-import com.astute.data.models.User
-import com.astute.data.requests.CreateAccountRequest
-import com.astute.data.requests.LoginRequest
 import com.astute.data.requests.UpdateProfileRequest
-import com.astute.data.responses.AuthResponse
 import com.astute.data.responses.BasicApiResponse
+import com.astute.data.responses.UserResponseItem
 import com.astute.service.PostService
 import com.astute.service.UserService
 import com.astute.util.ApiResponseMessages
-import com.astute.util.ApiResponseMessages.FIELDS_BLANK
-import com.astute.util.ApiResponseMessages.INVALID_CREDENTIALS
-import com.astute.util.ApiResponseMessages.USER_ALREADY_EXISTS
 import com.astute.util.Constants
+import com.astute.util.Constants.BANNER_IMAGE_PATH
 import com.astute.util.Constants.BASE_URL
 import com.astute.util.Constants.PROFILE_PICTURE_PATH
 import com.astute.util.QueryParams
 import com.astute.util.save
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import com.google.gson.Gson
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -29,7 +22,6 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import org.koin.ktor.ext.inject
 import java.io.File
-import java.util.*
 
 //fun Route.createUser(
 //    userService: UserService
@@ -132,7 +124,7 @@ fun Route.searchUser(userService: UserService) {
             if (query == null || query.isBlank()) {
                 call.respond(
                     HttpStatusCode.OK,
-                    listOf<User>()
+                    listOf<UserResponseItem>()
                 )
                 return@get
             }
@@ -150,12 +142,13 @@ fun Route.getPostsForProfile(
 ) {
     authenticate {
         get("/api/user/posts") {
+            val userId = call.parameters[QueryParams.PARAM_USER_ID]
             val page = call.parameters[QueryParams.PARAM_PAGE]?.toIntOrNull() ?: 0
             val pageSize =
                 call.parameters[QueryParams.PARAM_PAGE_SIZE]?.toIntOrNull() ?: Constants.DEFAULT_POST_PAGE_SIZE
 
             val posts = postService.getPostsForProfile(
-                userId = call.userId,
+                userId = userId ?: call.userId,
                 page = page,
                 pageSize = pageSize
             )
@@ -203,7 +196,8 @@ fun Route.updateUserProfile(userService: UserService) {
         put("/api/user/update") {
             val multipart = call.receiveMultipart()
             var updateProfileRequest: UpdateProfileRequest? = null
-            var fileName: String? = null
+            var profilePictureFileName: String? = null
+            var bannerImageFileName: String? = null
             multipart.forEachPart { partData ->
                 when (partData) {
                     is PartData.FormItem -> {
@@ -215,18 +209,32 @@ fun Route.updateUserProfile(userService: UserService) {
                         }
                     }
                     is PartData.FileItem -> {
-                        fileName = partData.save(PROFILE_PICTURE_PATH)
+                        if (partData.name == "profile_picture") {
+                            profilePictureFileName = partData.save(PROFILE_PICTURE_PATH)
+                        } else if (partData.name == "banner_image") {
+                            bannerImageFileName = partData.save(BANNER_IMAGE_PATH)
+                        }
                     }
                     is PartData.BinaryItem -> Unit
                 }
             }
 
-            val profilePictureUrl = "${BASE_URL}profile_pictures/$fileName"
+            val profilePictureUrl = "${BASE_URL}profile_pictures/$profilePictureFileName"
+            val bannerImageUrl = "${BASE_URL}banner_images/$bannerImageFileName"
 
             updateProfileRequest?.let { request ->
                 val updateAcknowledged = userService.updateUser(
                     userId = call.userId,
-                    profileImageUrl = profilePictureUrl,
+                    profileImageUrl = if (profilePictureFileName == null) {
+                        null
+                    } else {
+                        profilePictureUrl
+                    },
+                    bannerUrl = if(bannerImageFileName == null) {
+                        null
+                    } else {
+                        bannerImageUrl
+                    },
                     updateProfileRequest = request
                 )
                 if (updateAcknowledged) {
@@ -237,7 +245,7 @@ fun Route.updateUserProfile(userService: UserService) {
                         )
                     )
                 } else {
-                    File("${PROFILE_PICTURE_PATH}/$fileName").delete()
+                    File("${PROFILE_PICTURE_PATH}/$profilePictureFileName").delete()
                     call.respond(HttpStatusCode.InternalServerError)
                 }
             } ?: kotlin.run {
