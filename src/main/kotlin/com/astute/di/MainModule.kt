@@ -10,6 +10,8 @@ import com.astute.data.repository.likes.LikeRepository
 import com.astute.data.repository.likes.LikeRepositoryImpl
 import com.astute.data.repository.post.PostRepository
 import com.astute.data.repository.post.PostRepositoryImpl
+import com.astute.data.repository.skill.SkillRepository
+import com.astute.data.repository.skill.SkillRepositoryImpl
 import com.astute.data.repository.user.UserRepository
 import com.astute.data.repository.user.UserRepositoryImpl
 import com.astute.service.*
@@ -42,12 +44,17 @@ val mainModule = module {
     single<ActivityRepository> {
         ActivityRepositoryImpl(get())
     }
+    single<SkillRepository> {
+        SkillRepositoryImpl(get())
+    }
     single { UserService(get(), get()) }
     single { FollowService(get()) }
     single { PostService(get()) }
     single { LikeService(get(), get(), get()) }
     single { CommentService(get()) }
     single { ActivityService(get(), get(), get()) }
+    single { SkillService(get()) }
+
 
     single { Gson() }
 }
