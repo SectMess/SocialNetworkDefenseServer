@@ -186,6 +186,7 @@ fun Route.getUserProfile(userService: UserService) {
                     data = profileResponse
                 )
             )
+            println(profileResponse.topSkills)
         }
     }
 }
@@ -211,7 +212,7 @@ fun Route.updateUserProfile(userService: UserService) {
                     is PartData.FileItem -> {
                         if (partData.name == "profile_picture") {
                             profilePictureFileName = partData.save(PROFILE_PICTURE_PATH)
-                        } else if (partData.name == "banner_image") {
+                        } else if (partData.name == "banner_pictures") {
                             bannerImageFileName = partData.save(BANNER_IMAGE_PATH)
                         }
                     }
@@ -220,7 +221,7 @@ fun Route.updateUserProfile(userService: UserService) {
             }
 
             val profilePictureUrl = "${BASE_URL}profile_pictures/$profilePictureFileName"
-            val bannerImageUrl = "${BASE_URL}banner_images/$bannerImageFileName"
+            val bannerImageUrl = "${BASE_URL}banner_pictures/$bannerImageFileName"
 
             updateProfileRequest?.let { request ->
                 val updateAcknowledged = userService.updateUser(

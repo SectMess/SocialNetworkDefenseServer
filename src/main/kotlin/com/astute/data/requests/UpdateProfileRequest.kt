@@ -1,6 +1,7 @@
 package com.astute.data.requests
 
 import com.astute.data.models.Skill
+import com.astute.data.responses.SkillDto
 
 data class UpdateProfileRequest(
     val username: String,
@@ -8,5 +9,5 @@ data class UpdateProfileRequest(
     val gitHubUrl: String,
     val instagramUrl: String,
     val linkedInUrl: String,
-    val skills: List<Skill>,
+    val skills: List<SkillDto>,
 )
