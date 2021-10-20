@@ -42,6 +42,8 @@ fun Application.configureRouting() {
         //Post Routes
         createPost(postService)
         deletePost(postService, likeService, commentService)
+        getPostDetails(postService)
+
 
         // Like routes
         likeParent(likeService, activityService)

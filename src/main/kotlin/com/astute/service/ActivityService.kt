@@ -4,6 +4,7 @@ import com.astute.data.models.Activity
 import com.astute.data.repository.activity.ActivityRepository
 import com.astute.data.repository.comment.CommentRepository
 import com.astute.data.repository.post.PostRepository
+import com.astute.data.responses.ActivityResponse
 import com.astute.data.util.ActivityType
 import com.astute.data.util.ParentType
 import com.astute.util.Constants
@@ -18,7 +19,7 @@ class ActivityService(
         userId: String,
         page: Int = 0,
         pageSize: Int = Constants.DEFAULT_ACTIVITY_PAGE_SIZE
-    ): List<Activity> {
+    ): List<ActivityResponse> {
         return activityRepository.getActivitiesForUser(userId, page, pageSize)
     }
 
