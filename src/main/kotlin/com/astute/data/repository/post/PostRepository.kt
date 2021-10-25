@@ -1,6 +1,7 @@
 package com.astute.data.repository.post
 
 import com.astute.data.models.Post
+import com.astute.data.responses.PostResponse
 import com.astute.util.Constants
 
 
@@ -23,4 +24,7 @@ interface PostRepository {
     ): List<Post>
 
     suspend fun getPost(postId: String): Post?
+
+    suspend fun getPostDetails(userId: String, postId: String): PostResponse?
+
 }
