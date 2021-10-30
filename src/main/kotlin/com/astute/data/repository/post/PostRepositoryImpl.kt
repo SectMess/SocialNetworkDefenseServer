@@ -6,6 +6,7 @@ import com.astute.data.models.Post
 import com.astute.data.models.User
 import com.astute.data.responses.PostResponse
 import org.litote.kmongo.`in`
+import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
 
@@ -44,12 +45,31 @@ class PostRepositoryImpl(
             .toList()
     }
 
-    override suspend fun getPostsForProfile(userId: String, page: Int, pageSize: Int): List<Post> {
+    override suspend fun getPostsForProfile(userId: String, page: Int, pageSize: Int): List<PostResponse> {
+        val user = users.findOneById(userId) ?: return emptyList()
+
         return posts.find(Post::userId eq userId)
             .skip(page * pageSize)
             .limit(pageSize)
             .descendingSort(Post::timestamp)
             .toList()
+            .map { post ->
+                val isLiked = likes.findOne(and(
+                    Like::parentId eq post.id,
+                    Like::userId eq userId
+                )) != null
+                PostResponse(
+                    id = post.id,
+                    userId = userId,
+                    username = user.username,
+                    imageUrl = post.imageUrl,
+                    profilePictureUrl = user.profileImageUrl,
+                    description = post.description,
+                    likeCount = post.likeCount,
+                    commentCount = post.commentCount,
+                    isLiked = isLiked
+                )
+            }
     }
 
     override suspend fun getPost(postId: String): Post? {
